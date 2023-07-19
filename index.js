@@ -49,6 +49,31 @@ app.post('/fortune', (req, res) => {
         });
 });
 
+app.post('/getfortune', async (req, res) => {
+    const { fortune, age, relationship, gender, mood } = req.body;
+
+    //Request data control
+    // if (!fortune || !age || !relationship || !gender || !mood) {
+    //     res.status(400).json({ error: 'Eksik bilgi var!' });
+    //     return;
+    // }
+
+
+    try {
+        // Model.find() yerine Model.find().exec() ile Promise döndürün
+        const matchFortune = await Fortune.find(req.body).exec();
+
+        res.json(matchFortune);
+    } catch (err) {
+        console.error('Veriler çekilirken hata oluştu:', err);
+        res.status(500).send('Veriler çekilirken bir hata oluştu.');
+    }
+
+    // Eşleşen verileri gönderin
+    res.send(res);
+
+});
+
 app.listen(port, () => {
     console.log(`Server Runing.`);
 });
