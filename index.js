@@ -8,7 +8,12 @@ const app = express();
 const port = 5000;
 
 app.use(bodyParser.json());
-
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
 mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('MongoDB connection success.');
@@ -32,10 +37,29 @@ const Fortune = mongoose.model('Fortune', FortuneSchema);
 app.post('/fortune', (req, res) => {
     const { fortune, age, relationship, gender, mood } = req.body;
 
-    if (!fortune || !age || !relationship || !gender || !mood) {
-        res.status(400).json({ error: 'Eksik bilgi var!' });
+    if (!fortune) {
+        res.status(400).json({ error: 'Fortune information missing' });
         return;
     }
+    if (!age) {
+        res.status(400).json({ error: 'Age information missing' });
+        return;
+    }
+    if (!relationship) {
+        res.status(400).json({ error: 'Relationship information missing' });
+        return;
+    }
+    if (!gender) {
+        res.status(400).json({ error: 'Gender information missing' });
+        return;
+    }
+    if (!mood) {
+        res.status(400).json({ error: 'Mood information missing' });
+        return;
+    }
+
+
+
 
     const mongooseFortune = new Fortune({ fortune, age, relationship, gender, mood });
 
@@ -44,8 +68,8 @@ app.post('/fortune', (req, res) => {
             res.status(201).json("Fortune save success");
         })
         .catch(err => {
-            console.error('Veri eklenirken hata oluştu:', err);
-            res.status(500).json({ error: 'Veri eklenirken hata oluştu!' });
+            console.error('Error adding data:', err);
+            res.status(500).json({ error: 'Error adding data!' });
         });
 });
 
@@ -65,8 +89,8 @@ app.post('/getfortune', async (req, res) => {
 
         res.json(matchFortune);
     } catch (err) {
-        console.error('Veriler çekilirken hata oluştu:', err);
-        res.status(500).send('Veriler çekilirken bir hata oluştu.');
+        console.error('Erorr getting data!', err);
+        res.status(500).send('Erorr getting data!');
     }
 
     // Eşleşen verileri gönderin
