@@ -58,9 +58,6 @@ app.post('/fortune', (req, res) => {
         return;
     }
 
-
-
-
     const mongooseFortune = new Fortune({ fortune, age, relationship, gender, mood });
 
     mongooseFortune.save()
@@ -73,31 +70,29 @@ app.post('/fortune', (req, res) => {
         });
 });
 
-app.post('/getfortune', async (req, res) => {
-    const { fortune, age, relationship, gender, mood } = req.body;
-
-    //Request data control
-    // if (!fortune || !age || !relationship || !gender || !mood) {
-    //     res.status(400).json({ error: 'Eksik bilgi var!' });
-    //     return;
-    // }
-
+app.post("/getfortune", async (req, res) => {
+    const { age, relationship, gender, mood } = req.body;
 
     try {
-        // Model.find() yerine Model.find().exec() ile Promise döndürün
-        const matchFortune = await Fortune.find(req.body).exec();
+        const matchedDocuments = await Fortune.find({
+            age: age,
+            relationship: relationship,
+            gender: gender,
+            mood: mood,
 
-        res.json(matchFortune);
-    } catch (err) {
-        console.error('Erorr getting data!', err);
-        res.status(500).send('Erorr getting data!');
+        });
+
+        if (matchedDocuments.length === 0) {
+            res.status(404).json({ error: "No matching data found." });
+        } else {
+            const randomIndex = Math.floor(Math.random() * matchedDocuments.length);
+            const randomDocument = matchedDocuments[randomIndex];
+            res.json(randomDocument);
+        }
+    } catch (error) {
+        res.status(500).json({ error: error });
     }
-
-    // Eşleşen verileri gönderin
-    res.send(res);
-
 });
-
 app.listen(port, () => {
     console.log(`Server Runing.`);
 });
