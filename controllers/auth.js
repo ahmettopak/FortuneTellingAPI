@@ -1,5 +1,6 @@
 const Auth = require('../models/auth.js')
 const jwt = require('jsonwebtoken')
+//Dotr env config yapılacak
 
 const register = async (req, res) => {
     try {
@@ -75,7 +76,59 @@ const deleteUser = async (req, res) => {
     }
 }
 
+const otp = async (req, res) => {
+    try {
+        // Kullanıcıya OTP kodunu gönderme
+        const { email } = req.body;
+
+        const otp = generateOTP();
+        sendOTP(email, otp);
+
+        res.json({ message: otp });
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+}
 
 
 
-module.exports = { register, login, deleteUser }
+// OTP kodu oluşturma
+function generateOTP() {
+    return randomstring.generate({
+        length: 6,
+        charset: 'numeric'
+    });
+}
+
+// E-posta gönderme fonksiyonu
+function sendOTP(email, otp) {
+    const transporter = nodemailer.createTransport({
+        service: 'Hotmail', // E-posta sağlayıcınıza göre değiştirin
+        auth: {
+            user: process.env.EMAIL, // E-posta adresinizi buraya girin
+            pass: process.env.EMAIL_PASS // E-posta şifrenizi buraya girin
+        }
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL,
+        to: email,
+        subject: 'OTP Kodu',
+        text: `OTP Kodunuz: ${otp}`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('E-posta gönderildi: ' + info.response);
+        }
+    });
+}
+
+
+
+
+
+module.exports = { register, login, deleteUser, otp }
