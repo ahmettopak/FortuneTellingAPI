@@ -1,6 +1,10 @@
 const Auth = require('../models/auth.js')
 const jwt = require('jsonwebtoken')
-//Dotr env config yapılacak
+
+//Otp settings
+const nodemailer = require('nodemailer');
+const randomstring = require('randomstring');
+require('dotenv').config();
 
 const register = async (req, res) => {
     try {
@@ -115,7 +119,7 @@ function sendOTP(email, otp) {
         from: process.env.EMAIL,
         to: email,
         subject: 'OTP Kodu',
-        text: `OTP Kodunuz: ${otp}`
+        text: `Coffe Time için OTP Kodunuz: ${otp}`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
