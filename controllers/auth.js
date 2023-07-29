@@ -8,23 +8,21 @@ require('dotenv').config();
 
 const register = async (req, res) => {
     try {
-        const { username, email, password } = req.body
+        const { fullname, gender, dateOfBirth, email, password } = req.body
         const userEmail = await Auth.findOne({ email })
-        const userName = await Auth.findOne({ username })
+
         if (userEmail) {
             return res.status(500).json({ message: "Bu email hesabı zaten bulunmakta !!" })
         }
-        if (userName) {
-            return res.status(500).json({ message: "Bu Kullanıcı adı zaten bulunmakta !!" })
-        }
+
         if (password.length < 6) {
             return res.status(500).json({ message: "Parolanız 6 karakterden kücük olmamalı..." })
         }
         // const passwordHash = await (bcrypt.hashpassword, password)
 
 
-        const newUser = await Auth.create({ username, email, password })
-        //const userToken = await jwt.sign({ id: newUser.id }, process.env.SECRET_TOKEN, { expiresIn: '1h' });
+        const newUser = await Auth.create({ fullname, gender, dateOfBirth, email, password })
+        //const userToken = await jwt.sign({ id: newUser.id }, process.env.SECRET_,TOKEN, { expiresIn: '1h' });
         res.status(200).json({
             status: "OK",
             newUser,
@@ -38,8 +36,8 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password, username } = req.body;
-        const user = await Auth.findOne({ email, username });
+        const { email, password } = req.body;
+        const user = await Auth.findOne({ email });
         if (!user) {
             return res.status(500).json({ message: "Böyle bir kullanıcı bulunamadı..." })
         }
@@ -48,12 +46,18 @@ const login = async (req, res) => {
             return res.status(500).json({ message: "Parolanız yanlısss...." })
         }
         //const token = jwt.sign({ id: user.id }, process.env.SECRET_TOKEN, { expiresIn: '1h' })
-        res.status(200).json(
-            //status = "OK",
-            //user,
-            "Login Success"
-            //token
-        )
+        // res.status(200).json(
+        //     //status = "OK",
+        //     //user,
+        //     "Login Success"
+        //     //token
+        // )
+
+        const otp = generateOTP();
+        sendOTP(email, otp);
+
+        res.status(200).json({ message: otp, user });
+
     } catch (error) {
         return res.status(500).json({ message: error.message })
     }
